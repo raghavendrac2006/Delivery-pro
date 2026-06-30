@@ -1849,6 +1849,18 @@ class LedgerState extends ChangeNotifier {
     }
   }
 
+  Future<void> resetOwnerLoan(double newBorrowedAmount) async {
+    if (_activeLoan != null) {
+      await ownerFinanceRepository.resetLoan(_activeLoan!.id, newBorrowedAmount);
+      final now = DateTime.now();
+      final dateStr = "${now.day}/${now.month}/${now.year}";
+      final currentNotes = _activeLoan!.notes;
+      final separator = currentNotes.isEmpty ? "" : "\n\n";
+      final newNotes = "$currentNotes${separator}--- New Loan Cycle Started on $dateStr (Borrowed: ₹${newBorrowedAmount.toStringAsFixed(2)}) ---";
+      await ownerFinanceRepository.updateNotes(_activeLoan!.id, newNotes);
+    }
+  }
+
   Future<void> addSavingsDeposit(double amount) async {
     if (amount > 0.0) {
       final log = SavingsLog(

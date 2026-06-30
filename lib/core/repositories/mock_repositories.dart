@@ -663,6 +663,23 @@ class MockOwnerFinanceRepository implements OwnerFinanceRepository {
   }
 
   @override
+  Future<void> resetLoan(String loanId, double newBorrowedAmount) async {
+    MockDb.getRepayments(businessId).clear();
+    final current = MockDb.getLoanConfig(businessId);
+    final updated = OwnerLoanConfig(
+      id: current.id,
+      description: current.description,
+      totalBorrowed: newBorrowedAmount,
+      amountRepaid: 0.0,
+      notes: current.notes,
+      createdAt: DateTime.now(),
+    );
+    MockDb.setLoanConfig(businessId, updated);
+    _repaymentsController.add([]);
+    _loanController.add(updated);
+  }
+
+  @override
   Stream<List<RepaymentLog>> getRepaymentsStream(String loanId) {
     return _createMockStream(_repaymentsController, () => List.from(MockDb.getRepayments(businessId)));
   }

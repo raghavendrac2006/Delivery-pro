@@ -5,6 +5,7 @@ abstract class OwnerFinanceRepository {
   Future<void> updateNotes(String loanId, String notes);
   Future<void> addRepayment(String loanId, RepaymentLog repayment);
   Future<void> updateTotalBorrowed(String loanId, double totalBorrowed);
+  Future<void> resetLoan(String loanId, double newBorrowedAmount);
   Stream<List<RepaymentLog>> getRepaymentsStream(String loanId);
   Future<void> initDefaultLoanConfigIfEmpty();
 

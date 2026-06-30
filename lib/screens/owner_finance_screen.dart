@@ -425,6 +425,122 @@ class _OwnerFinanceScreenState extends State<OwnerFinanceScreen> {
     );
   }
 
+  void _showResetLoanDialog(LedgerState state) {
+    final controller = TextEditingController();
+    String? errorText;
+
+    showDialog(
+      context: context,
+      builder: (context) {
+        return StatefulBuilder(
+          builder: (context, setState) {
+            return AlertDialog(
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(AppTheme.radiusLg),
+                side: const BorderSide(color: AppTheme.outlineVariant, width: 1.0),
+              ),
+              backgroundColor: Colors.white,
+              title: Row(
+                children: [
+                  const Icon(Icons.warning_amber_rounded, color: AppTheme.error, size: 24.0),
+                  const SizedBox(width: 8.0),
+                  Text(
+                    "START NEW LOAN",
+                    style: AppTheme.headlineMd.copyWith(fontSize: 18.0, color: AppTheme.error),
+                  ),
+                ],
+              ),
+              content: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  Text(
+                    "This will clear the current loan repayment history, reset the amount repaid to ₹0.00, and start a fresh loan ledger.\n\nNote: The manual notes section will not be deleted, but a new line will be appended.",
+                    style: AppTheme.bodyMd.copyWith(color: AppTheme.onSurfaceVariant),
+                  ),
+                  const SizedBox(height: 20.0),
+                  TextField(
+                    controller: controller,
+                    keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                    style: AppTheme.bodyMd,
+                    decoration: InputDecoration(
+                      labelText: "New Capital Borrowed Amount (₹)",
+                      labelStyle: AppTheme.labelSm,
+                      hintText: "e.g., 5000 (Defaults to 0)",
+                      errorText: errorText,
+                      filled: true,
+                      fillColor: AppTheme.background,
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(AppTheme.radiusMd),
+                      ),
+                    ),
+                    onChanged: (_) {
+                      if (errorText != null) {
+                        setState(() {
+                          errorText = null;
+                        });
+                      }
+                    },
+                  ),
+                ],
+              ),
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.pop(context),
+                  child: Text(
+                    "CANCEL",
+                    style: AppTheme.labelBold.copyWith(color: AppTheme.outline),
+                  ),
+                ),
+                Container(
+                  decoration: BoxDecoration(
+                    color: AppTheme.error,
+                    borderRadius: BorderRadius.circular(AppTheme.radiusSm),
+                  ),
+                  child: TextButton(
+                    onPressed: () async {
+                      final valText = controller.text.trim();
+                      double val = 0.0;
+                      if (valText.isNotEmpty) {
+                        final parsed = double.tryParse(valText);
+                        if (parsed == null || parsed < 0) {
+                          setState(() {
+                            errorText = "Enter a valid amount >= 0";
+                          });
+                          return;
+                        }
+                        val = parsed;
+                      }
+
+                      Navigator.pop(context);
+                      try {
+                        this.setState(() {
+                          _isNotesInitialized = false;
+                        });
+                        await state.resetOwnerLoan(val);
+                        if (context.mounted) {
+                          CustomToast.showSuccess(context, "Fresh loan cycle started with ₹${val.toStringAsFixed(0)}");
+                        }
+                      } catch (e) {
+                        if (context.mounted) {
+                          CustomToast.showError(context, "Failed to start fresh loan cycle");
+                        }
+                      }
+                    },
+                    child: Text(
+                      "START FRESH",
+                      style: AppTheme.labelBold.copyWith(color: Colors.white),
+                    ),
+                  ),
+                ),
+              ],
+            );
+          }
+        );
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final state = Provider.of<LedgerState>(context);
@@ -1178,13 +1294,32 @@ class _OwnerFinanceScreenState extends State<OwnerFinanceScreen> {
             children: [
               buildSegmentedControl(),
               if (!_showSavings) ...[
-                Text(
-                  "OWNER CAPITAL LOAN LEDGER",
-                  style: AppTheme.labelBold.copyWith(
-                    fontSize: 11.0,
-                    color: AppTheme.onSurfaceVariant,
-                    letterSpacing: 1.5,
-                  ),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(
+                      "OWNER CAPITAL LOAN LEDGER",
+                      style: AppTheme.labelBold.copyWith(
+                        fontSize: 11.0,
+                        color: AppTheme.onSurfaceVariant,
+                        letterSpacing: 1.5,
+                      ),
+                    ),
+                    TextButton.icon(
+                      onPressed: () => _showResetLoanDialog(state),
+                      icon: const Icon(Icons.refresh_outlined, size: 14.0, color: AppTheme.error),
+                      label: const Text("START NEW LOAN"),
+                      style: TextButton.styleFrom(
+                        foregroundColor: AppTheme.error,
+                        padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 4.0),
+                        tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                        textStyle: AppTheme.labelBold.copyWith(
+                          fontSize: 11.0,
+                          letterSpacing: 0.5,
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
                 const SizedBox(height: 16.0),
                 buildMetrics(),

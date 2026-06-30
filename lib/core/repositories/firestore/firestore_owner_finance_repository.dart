@@ -58,6 +58,24 @@ class FirestoreOwnerFinanceRepository implements OwnerFinanceRepository {
   }
 
   @override
+  Future<void> resetLoan(String loanId, double newBorrowedAmount) async {
+    final loanRef = _firestore.collection(_getCollectionPath('owner_loans')).doc(loanId);
+    final repaymentsSnapshot = await loanRef.collection('repayments').get();
+    
+    final batch = _firestore.batch();
+    for (var doc in repaymentsSnapshot.docs) {
+      batch.delete(doc.reference);
+    }
+    
+    batch.update(loanRef, {
+      'amountRepaid': 0.0,
+      'totalBorrowed': newBorrowedAmount,
+    });
+    
+    await batch.commit();
+  }
+
+  @override
   Stream<List<RepaymentLog>> getRepaymentsStream(String loanId) {
     return _firestore
         .collection(_getCollectionPath('owner_loans'))
