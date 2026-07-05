@@ -121,7 +121,9 @@ class _SummaryScreenState extends State<SummaryScreen> {
                     revenue: state.currentBagRevenue,
                     expenses: state.currentBagExpenses,
                     profit: state.currentBagProfit,
-                    profitMargin: state.currentBagProfitMargin,
+                    cashAvailable: state.currentBagCashAvailable,
+                    outstandingCollections: state.currentBagOutstandingCollections,
+                    cashCollected: state.currentBagCashCollected,
                   ),
                   const SizedBox(height: 28.0),
 

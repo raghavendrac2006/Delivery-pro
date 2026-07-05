@@ -1068,6 +1068,46 @@ class LedgerState extends ChangeNotifier {
     notifyListeners();
   }
 
+  static final Map<String, List<ExpenseLog>> _historicalBatchExpenses = {
+    'BAG_1779890210430': [
+      ExpenseLog(expenseId: 'HIST_1_1', itemName: 'Gas cylinder domestic', category: 'General', amount: 731.0, date: '2026-05-23', associatedBagId: 'BAG_1779890210430'),
+      ExpenseLog(expenseId: 'HIST_1_2', itemName: 'Oil', category: 'Cylinders', amount: 600.0, date: '2026-05-27', associatedBagId: 'BAG_1779890210430'),
+      ExpenseLog(expenseId: 'HIST_1_3', itemName: 'Labour vegetables', category: 'Cylinders', amount: 100.0, date: '2026-05-27', associatedBagId: 'BAG_1779890210430'),
+      ExpenseLog(expenseId: 'HIST_1_4', itemName: 'Labour medicine', category: 'Cylinders', amount: 100.0, date: '2026-05-28', associatedBagId: 'BAG_1779890210430'),
+      ExpenseLog(expenseId: 'HIST_1_5', itemName: 'Oil', category: 'Cylinders', amount: 266.0, date: '2026-06-03', associatedBagId: 'BAG_1779890210430'),
+      ExpenseLog(expenseId: 'HIST_1_6', itemName: 'Covers', category: 'Cylinders', amount: 240.0, date: '2026-06-03', associatedBagId: 'BAG_1779890210430'),
+      ExpenseLog(expenseId: 'HIST_1_7', itemName: 'Oil', category: 'Cylinders', amount: 635.0, date: '2026-06-04', associatedBagId: 'BAG_1779890210430'),
+      ExpenseLog(expenseId: 'HIST_1_8', itemName: 'Labour vegetables', category: 'General', amount: 70.0, date: '2026-06-04', associatedBagId: 'BAG_1779890210430'),
+      ExpenseLog(expenseId: 'HIST_1_9', itemName: 'Oil', category: 'General', amount: 630.0, date: '2026-06-06', associatedBagId: 'BAG_1779890210430'),
+      ExpenseLog(expenseId: 'HIST_1_10', itemName: 'Labour home', category: 'General', amount: 160.0, date: '2026-06-06', associatedBagId: 'BAG_1779890210430'),
+      ExpenseLog(expenseId: 'HIST_1_11', itemName: 'Labour home', category: 'General', amount: 160.0, date: '2026-06-08', associatedBagId: 'BAG_1779890210430'),
+      ExpenseLog(expenseId: 'HIST_1_12', itemName: 'Oil', category: 'General', amount: 528.0, date: '2026-06-08', associatedBagId: 'BAG_1779890210430'),
+      ExpenseLog(expenseId: 'HIST_1_13', itemName: 'Labour vegetables', category: 'General', amount: 100.0, date: '2026-06-08', associatedBagId: 'BAG_1779890210430'),
+      ExpenseLog(expenseId: 'HIST_1_14', itemName: 'Labour home', category: 'General', amount: 100.0, date: '2026-06-08', associatedBagId: 'BAG_1779890210430'),
+      ExpenseLog(expenseId: 'HIST_1_15', itemName: 'Kadale pappu', category: 'General', amount: 570.0, date: '2026-06-08', associatedBagId: 'BAG_1779890210430'),
+      ExpenseLog(expenseId: 'HIST_1_16', itemName: 'Chilli', category: 'General', amount: 220.0, date: '2026-06-08', associatedBagId: 'BAG_1779890210430'),
+    ],
+    'BAG_1780969424862': [
+      ExpenseLog(expenseId: 'HIST_2_1', itemName: 'Labour gas', category: 'General', amount: 239.0, date: '2026-05-23', associatedBagId: 'BAG_1780969424862'),
+      ExpenseLog(expenseId: 'HIST_2_2', itemName: 'Machine cooli', category: 'General', amount: 315.0, date: '2026-06-09', associatedBagId: 'BAG_1780969424862'),
+      ExpenseLog(expenseId: 'HIST_2_3', itemName: 'Oil', category: 'General', amount: 532.0, date: '2026-06-09', associatedBagId: 'BAG_1780969424862'),
+      ExpenseLog(expenseId: 'HIST_2_4', itemName: 'Labour drinking milk', category: 'General', amount: 1500.0, date: '2026-06-10', associatedBagId: 'BAG_1780969424862'),
+      ExpenseLog(expenseId: 'HIST_2_5', itemName: 'Oil', category: 'General', amount: 532.0, date: '2026-06-10', associatedBagId: 'BAG_1780969424862'),
+      ExpenseLog(expenseId: 'HIST_2_6', itemName: 'Cover', category: 'General', amount: 240.0, date: '2026-06-10', associatedBagId: 'BAG_1780969424862'),
+      ExpenseLog(expenseId: 'HIST_2_7', itemName: 'Labour home', category: 'General', amount: 60.0, date: '2026-06-11', associatedBagId: 'BAG_1780969424862'),
+      ExpenseLog(expenseId: 'HIST_2_8', itemName: 'Labour home', category: 'General', amount: 410.0, date: '2026-06-12', associatedBagId: 'BAG_1780969424862'),
+      ExpenseLog(expenseId: 'HIST_2_9', itemName: 'Oil', category: 'General', amount: 532.0, date: '2026-06-12', associatedBagId: 'BAG_1780969424862'),
+      ExpenseLog(expenseId: 'HIST_2_10', itemName: 'Oil', category: 'General', amount: 528.0, date: '2026-06-13', associatedBagId: 'BAG_1780969424862'),
+      ExpenseLog(expenseId: 'HIST_2_11', itemName: 'Eligaram', category: 'General', amount: 60.0, date: '2026-06-13', associatedBagId: 'BAG_1780969424862'),
+      ExpenseLog(expenseId: 'HIST_2_12', itemName: 'Oil', category: 'General', amount: 1320.0, date: '2026-06-14', associatedBagId: 'BAG_1780969424862'),
+      ExpenseLog(expenseId: 'HIST_2_13', itemName: 'Nuvvulu', category: 'General', amount: 230.0, date: '2026-06-15', associatedBagId: 'BAG_1780969424862'),
+      ExpenseLog(expenseId: 'HIST_2_14', itemName: 'Oil', category: 'General', amount: 1320.0, date: '2026-06-16', associatedBagId: 'BAG_1780969424862'),
+      ExpenseLog(expenseId: 'HIST_2_15', itemName: 'Electricity bill', category: 'General', amount: 1032.0, date: '2026-06-16', associatedBagId: 'BAG_1780969424862'),
+      ExpenseLog(expenseId: 'HIST_2_16', itemName: 'Labour temple', category: 'General', amount: 100.0, date: '2026-06-16', associatedBagId: 'BAG_1780969424862'),
+    ],
+    'BAG_1781782114856': []
+  };
+
   final List<ExpenseLog> _expenses = [];
   List<ExpenseLog> get expenses => _expenses;
 
@@ -1369,6 +1409,10 @@ class LedgerState extends ChangeNotifier {
     if (bag.status == "Active") return currentBagExpenses;
     if (bag.expenses != null) return bag.expenses!;
     
+    if (_historicalBatchExpenses.containsKey(bag.bagId)) {
+      return _historicalBatchExpenses[bag.bagId]!.fold(0.0, (total, exp) => total + exp.amount);
+    }
+    
     DateTime? startDate;
     try {
       startDate = DateFormat('dd MMMM yyyy').parse(bag.startDate);
@@ -1473,6 +1517,10 @@ class LedgerState extends ChangeNotifier {
   List<ExpenseLog> getExpensesForBag(RiceBag bag) {
     if (bag.status == "Active") return currentBagExpensesList;
 
+    if (_historicalBatchExpenses.containsKey(bag.bagId)) {
+      return _historicalBatchExpenses[bag.bagId]!;
+    }
+
     DateTime? startDate;
     try {
       startDate = DateFormat('dd MMMM yyyy').parse(bag.startDate);
@@ -1511,6 +1559,18 @@ class LedgerState extends ChangeNotifier {
     if (rev <= 0.0) return 0.0;
     return (currentBagProfit / rev) * 100;
   }
+
+  double get currentBagOutstandingCollections {
+    final activeBag = activeRiceBag;
+    if (activeBag == null) return 0.0;
+    return _deliveryLogs
+        .where((log) => !log.isPayment && log.associatedBagId == activeBag.bagId && !log.isPaid)
+        .fold(0.0, (total, log) => total + log.amount);
+  }
+
+  double get currentBagCashCollected => currentBagRevenue - currentBagOutstandingCollections;
+
+  double get currentBagCashAvailable => currentBagCashCollected - currentBagExpenses;
 
   // Profit & Financial Overview - Lifetime (Overall Business)
   double get overallRevenue {
