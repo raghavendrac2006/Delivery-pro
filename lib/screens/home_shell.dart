@@ -81,7 +81,7 @@ class _HomeShellState extends State<HomeShell> {
       final state = Provider.of<LedgerState>(context, listen: false);
       
       if (type == 'sale') {
-        if (item != null) {
+        if (item != null && item != 'custom') {
           String actualItem = "";
           if (item == '1_rs_chakli') actualItem = "1 ₹ Chakli";
           if (item == '5_rs_chakli') actualItem = "₹5 Chakli";
@@ -95,6 +95,14 @@ class _HomeShellState extends State<HomeShell> {
       } else if (type == 'expense') {
         setState(() {
           _currentIndex = 2; // Expenses
+        });
+      } else if (type == 'clients') {
+        setState(() {
+          _currentIndex = 3; // Client List
+        });
+      } else if (type == 'summary') {
+        setState(() {
+          _currentIndex = 4; // Summary
         });
       }
     }
