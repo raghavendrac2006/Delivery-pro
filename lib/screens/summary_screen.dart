@@ -107,6 +107,50 @@ class _SummaryScreenState extends State<SummaryScreen> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
+                  // BACKUP & RESET BUTTONS
+                  Row(
+                    children: [
+                      Expanded(
+                        child: ElevatedButton(
+                          onPressed: () async {
+                            CustomToast.showSuccess(context, "Preparing Backup...");
+                            await state.exportBackupData(context);
+                          },
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Colors.black,
+                            foregroundColor: Colors.white,
+                            minimumSize: const Size(0, 48),
+                          ),
+                          child: const Text("BACKUP DATA", style: TextStyle(fontSize: 12.0)),
+                        ),
+                      ),
+                      const SizedBox(width: 12.0),
+                      Expanded(
+                        child: ElevatedButton(
+                          onPressed: () async {
+                            final confirm = await CustomToast.showDestructiveConfirmation(
+                              context,
+                              title: "WIPE ALL DATA?",
+                              message: "Are you sure you want to delete ALL customer, sales, and expense records? This will reset the app completely to 0 and cannot be undone.",
+                              confirmLabel: "RESET TO 0",
+                            );
+                            if (confirm && context.mounted) {
+                              CustomToast.showSuccess(context, "Wiping database...");
+                              await state.wipeAllData(context);
+                            }
+                          },
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: AppTheme.error,
+                            foregroundColor: Colors.white,
+                            minimumSize: const Size(0, 48),
+                          ),
+                          child: const Text("RESET TO 0", style: TextStyle(fontSize: 12.0)),
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 24.0),
+
                   // SECTION 1: CURRENT BAG PERFORMANCE
                   Text(
                     "CURRENT BAG PERFORMANCE",

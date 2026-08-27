@@ -284,6 +284,9 @@ class CustomerProfileScreen extends StatelessWidget {
                                 onTap: () {
                                   _showEditDeleteBottomSheet(context, state, customer.name, index, tx);
                                 },
+                                onLongPress: () {
+                                  _showEditDeleteBottomSheet(context, state, customer.name, index, tx);
+                                },
                                 child: Padding(
                                   padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 14.0),
                                   child: Row(
@@ -352,18 +355,35 @@ class CustomerProfileScreen extends StatelessWidget {
                                                   ),
                                                 )
                                               : (isPaid
-                                                  ? Container(
-                                                      padding: const EdgeInsets.symmetric(horizontal: 10.0, vertical: 4.0),
-                                                      decoration: BoxDecoration(
-                                                        color: AppTheme.successContainer,
-                                                        borderRadius: BorderRadius.circular(100.0),
-                                                      ),
-                                                      child: Text(
-                                                        "PAID",
-                                                        style: AppTheme.labelBold.copyWith(
-                                                          color: AppTheme.onSuccessContainer,
-                                                          fontSize: 10.0,
-                                                          fontWeight: FontWeight.bold,
+                                                  ? InkWell(
+                                                      onTap: () async {
+                                                        final confirm = await CustomToast.showDestructiveConfirmation(
+                                                          context,
+                                                          title: "MARK AS UNPAID?",
+                                                          message: "Do you want to mark this ₹${tx.amount.toStringAsFixed(0)} transaction as UNPAID for ${customer.name}?",
+                                                          confirmLabel: "MARK UNPAID",
+                                                        );
+                                                        if (confirm && context.mounted) {
+                                                          await state.markTransactionAsUnpaid(customer.name, index);
+                                                          if (context.mounted) {
+                                                            CustomToast.showSuccess(context, "MARKED AS UNPAID");
+                                                          }
+                                                        }
+                                                      },
+                                                      borderRadius: BorderRadius.circular(100.0),
+                                                      child: Container(
+                                                        padding: const EdgeInsets.symmetric(horizontal: 10.0, vertical: 4.0),
+                                                        decoration: BoxDecoration(
+                                                          color: AppTheme.successContainer,
+                                                          borderRadius: BorderRadius.circular(100.0),
+                                                        ),
+                                                        child: Text(
+                                                          "PAID",
+                                                          style: AppTheme.labelBold.copyWith(
+                                                            color: AppTheme.onSuccessContainer,
+                                                            fontSize: 10.0,
+                                                            fontWeight: FontWeight.bold,
+                                                          ),
                                                         ),
                                                       ),
                                                     )
@@ -505,6 +525,40 @@ class CustomerProfileScreen extends StatelessWidget {
                 style: AppTheme.headlineMd.copyWith(fontSize: 20.0),
               ),
               const SizedBox(height: 24.0),
+
+              if (!tx.isPayment) ...[
+                InkWell(
+                  onTap: () async {
+                    Navigator.pop(context);
+                    if (tx.isPaid) {
+                      await state.markTransactionAsUnpaid(customerName, index);
+                      if (context.mounted) CustomToast.showSuccess(context, "MARKED AS UNPAID");
+                    } else {
+                      await state.markTransactionAsPaid(customerName, index);
+                      if (context.mounted) CustomToast.showSuccess(context, "MARKED AS PAID");
+                    }
+                  },
+                  child: Container(
+                    width: double.infinity,
+                    padding: const EdgeInsets.symmetric(vertical: 14.0),
+                    decoration: BoxDecoration(
+                      color: tx.isPaid ? AppTheme.surfaceContainerHighest : AppTheme.successContainer,
+                      borderRadius: BorderRadius.circular(AppTheme.radiusSm),
+                      border: Border.all(color: Colors.black, width: 1.5),
+                    ),
+                    child: Center(
+                      child: Text(
+                        tx.isPaid ? "MARK AS UNPAID" : "MARK AS PAID",
+                        style: AppTheme.labelBold.copyWith(
+                          color: tx.isPaid ? Colors.black : AppTheme.onSuccessContainer,
+                          letterSpacing: 1.0,
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 16.0),
+              ],
 
               Row(
                 children: [

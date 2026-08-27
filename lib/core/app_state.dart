@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:convert';
+import 'dart:io';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
@@ -7,6 +8,8 @@ import 'package:intl/intl.dart';
 import 'package:google_generative_ai/google_generative_ai.dart';
 import 'package:cloud_firestore/cloud_firestore.dart' hide Transaction;
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:path_provider/path_provider.dart';
+import 'package:share_plus/share_plus.dart';
 
 import 'models/customer.dart';
 import 'models/transaction.dart';
@@ -75,6 +78,138 @@ class LedgerState extends ChangeNotifier {
   bool _isLoading = true;
   bool get isLoading => _isLoading;
   final Set<String> _loadedStreams = {};
+
+  Future<void> exportBackupData(BuildContext context) async {
+    try {
+      final Map<String, dynamic> backupData = {};
+      final collections = ['customers', 'deliveryLogs', 'expenses', 'riceBags', 'dailyUsages'];
+      final firestore = FirebaseFirestore.instance;
+
+      for (final col in collections) {
+        final rootSnap = await firestore.collection(col).get();
+        final List<dynamic> docs = rootSnap.docs.map((d) => d.data()).toList();
+        
+        final b1Snap = await firestore.collection('businesses/business_1/$col').get();
+        final List<dynamic> b1Docs = b1Snap.docs.map((d) => d.data()).toList();
+        
+        backupData[col] = {
+          'root': docs,
+          'business_1': b1Docs,
+        };
+      }
+
+      final jsonString = jsonEncode(backupData);
+      
+      if (kIsWeb) {
+        // On Web, dart:io doesn't work, so we show a dialog with copyable text.
+        if (context.mounted) {
+          showDialog(
+            context: context,
+            builder: (ctx) => AlertDialog(
+              title: const Text("Database Backup"),
+              content: SizedBox(
+                width: double.maxFinite,
+                height: 400,
+                child: SingleChildScrollView(
+                  child: SelectableText(jsonString),
+                ),
+              ),
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.pop(ctx),
+                  child: const Text("CLOSE"),
+                ),
+              ],
+            ),
+          );
+        }
+      } else {
+        // Save to system temp directory to bypass path_provider MissingPluginException
+        final String tempPath = Directory.systemTemp.path;
+        final file = File('$tempPath/LedgerFlow_Backup.json');
+        await file.writeAsString(jsonString);
+
+        try {
+          await Share.shareXFiles([XFile(file.path)], text: "LedgerFlow Database Backup");
+        } catch (e) {
+          debugPrint("Share error: $e");
+          debugPrint("\n\n==== BACKUP DATA SAVED AT: ${file.path} ====\n");
+          debugPrint("==== BACKUP JSON ====\n$jsonString\n==== END JSON ====\n\n");
+        }
+      }
+
+    } catch (e) {
+      debugPrint("Backup error: $e");
+    }
+  }
+
+  Future<void> wipeAllData(BuildContext context) async {
+    try {
+      final firestore = FirebaseFirestore.instance;
+      final collections = [
+        'customers',
+        'deliveryLogs',
+        'expenses',
+        'riceBags',
+        'dailyUsages',
+        'monthlyStats',
+        'owner_loans',
+        'savings_logs',
+        'savings_recommendations',
+        'settings'
+      ];
+
+      for (final col in collections) {
+        // Root level docs
+        final rootSnap = await firestore.collection(col).get();
+        for (final doc in rootSnap.docs) {
+          if (col == 'owner_loans') {
+            final sub = await doc.reference.collection('repayments').get();
+            for (final sdoc in sub.docs) {
+              await sdoc.reference.delete();
+            }
+          }
+          await doc.reference.delete();
+        }
+
+        // Business_1 subcollection docs
+        final b1Snap = await firestore.collection('businesses/business_1/$col').get();
+        for (final doc in b1Snap.docs) {
+          if (col == 'owner_loans') {
+            final sub = await doc.reference.collection('repayments').get();
+            for (final sdoc in sub.docs) {
+              await sdoc.reference.delete();
+            }
+          }
+          await doc.reference.delete();
+        }
+      }
+
+      // Clear local SharedPreferences
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.clear();
+
+      // Reset in-memory state
+      _customers.clear();
+      _deliveryLogs.clear();
+      _expenses.clear();
+      _riceBags.clear();
+      _dailyUsages.clear();
+      _customerTransactions.clear();
+      _serialNumber = 1;
+
+      notifyListeners();
+
+      if (context.mounted) {
+        CustomToast.showSuccess(context, "ALL DATA WIPED! STARTED FRESH FROM 0.");
+      }
+    } catch (e) {
+      debugPrint("Error wiping data: $e");
+      if (context.mounted) {
+        CustomToast.showError(context, "Failed to wipe data: $e");
+      }
+    }
+  }
 
   void _onStreamLoaded(String streamName) {
     if (_isLoading) {
@@ -913,6 +1048,67 @@ class LedgerState extends ChangeNotifier {
           if (custIdx != -1) {
             _customers[custIdx] = _customers[custIdx].copyWith(
               outstanding: _customers[custIdx].outstanding + tx.amount,
+            );
+          }
+          notifyListeners();
+        }
+      }
+    }
+  }
+
+  Future<void> markTransactionAsUnpaid(String customerName, int index) async {
+    final cleanCustomer = toSentenceCase(customerName);
+    final list = _customerTransactions[customerName] ?? _customerTransactions[cleanCustomer];
+    if (list != null && index < list.length) {
+      final tx = list[index];
+      if (tx.isPaid && !tx.isPayment) {
+        // Optimistic UI updates
+        final updatedTx = tx.copyWith(isPaid: false);
+        list[index] = updatedTx;
+
+        final custIdx = _customers.indexWhere((c) => c.name.toLowerCase() == cleanCustomer.toLowerCase());
+        if (custIdx != -1) {
+          _customers[custIdx] = _customers[custIdx].copyWith(
+            outstanding: _customers[custIdx].outstanding + tx.amount,
+          );
+        }
+        notifyListeners();
+
+        try {
+          final logsList = await deliveryLogRepository.getLogsForCustomer(cleanCustomer);
+          final match = logsList.firstWhere(
+            (log) => log.amount == tx.amount && log.isPaid && log.itemName == tx.details,
+            orElse: () => throw Exception("Log not found"),
+          );
+          
+          if (match.logId != null) {
+            // 1. Mark original delivery log as unpaid in Firestore
+            await deliveryLogRepository.updateDeliveryLog(match.logId!, {
+              'isPaid': false,
+            });
+
+            // 2. Attempt to find the auto-generated "Cash Collected" payment and delete it
+            try {
+               final paymentMatch = logsList.firstWhere(
+                 (log) => log.isPayment && log.amount == tx.amount,
+               );
+               if (paymentMatch.logId != null) {
+                  await deliveryLogRepository.deleteDeliveryLog(paymentMatch.logId!);
+               }
+            } catch (_) {
+               debugPrint("Corresponding Cash Collected log not found for auto-deletion");
+            }
+          }
+
+          // 3. Increase outstanding balance in Firestore
+          await customerRepository.updateCustomerOutstanding(cleanCustomer, tx.amount);
+        } catch (e) {
+          debugPrint("Error in markTransactionAsUnpaid: $e");
+          // Revert optimistic update if Firestore failed
+          list[index] = tx;
+          if (custIdx != -1) {
+            _customers[custIdx] = _customers[custIdx].copyWith(
+              outstanding: (_customers[custIdx].outstanding - tx.amount).clamp(0.0, double.infinity),
             );
           }
           notifyListeners();
