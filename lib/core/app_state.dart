@@ -712,6 +712,15 @@ class LedgerState extends ChangeNotifier {
     notifyListeners();
   }
 
+  void quickStartRounds(String item) {
+    if (!_activeRoundsItems.contains(item)) {
+      _activeRoundsItems.add(item);
+    }
+    _currentLoggingItem = item;
+    _roundsStarted = true;
+    notifyListeners();
+  }
+
   void resetRounds() {
     _roundsStarted = false;
     for (var item in _setupItems) {
@@ -1916,7 +1925,7 @@ class LedgerState extends ChangeNotifier {
       final dateStr = "${now.day}/${now.month}/${now.year}";
       final currentNotes = _activeLoan!.notes;
       final separator = currentNotes.isEmpty ? "" : "\n\n";
-      final newNotes = "$currentNotes${separator}--- New Loan Cycle Started on $dateStr (Borrowed: ₹${newBorrowedAmount.toStringAsFixed(2)}) ---";
+      final newNotes = "$currentNotes$separator--- New Loan Cycle Started on $dateStr (Borrowed: ₹${newBorrowedAmount.toStringAsFixed(2)}) ---";
       await ownerFinanceRepository.updateNotes(_activeLoan!.id, newNotes);
     }
   }

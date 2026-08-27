@@ -15,6 +15,8 @@ import 'client_list_screen.dart';
 import 'summary_screen.dart';
 import 'owner_finance_screen.dart';
 import 'ai_analyst_screen.dart';
+import 'package:app_links/app_links.dart';
+import 'dart:async';
 
 class HomeShell extends StatefulWidget {
   const HomeShell({super.key});
@@ -27,6 +29,8 @@ class _HomeShellState extends State<HomeShell> {
   int _currentIndex = 0;
   late final List<Widget> _screens;
   String? _shownRecommendationDate;
+  late AppLinks _appLinks;
+  StreamSubscription<Uri>? _linkSubscription;
 
   @override
   void initState() {
@@ -44,6 +48,56 @@ class _HomeShellState extends State<HomeShell> {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       UpdateService.checkForUpdate(context);
     });
+    _initAppLinks();
+  }
+
+  void _initAppLinks() {
+    _appLinks = AppLinks();
+
+    _linkSubscription = _appLinks.uriLinkStream.listen((uri) {
+      _handleDeepLink(uri);
+    });
+
+    _appLinks.getInitialLink().then((uri) {
+      if (uri != null) {
+        Future.delayed(const Duration(milliseconds: 500), () {
+          _handleDeepLink(uri);
+        });
+      }
+    });
+  }
+
+  @override
+  void dispose() {
+    _linkSubscription?.cancel();
+    super.dispose();
+  }
+
+  void _handleDeepLink(Uri uri) {
+    if (uri.scheme == 'ledgerflow' && uri.host == 'action') {
+      final type = uri.queryParameters['type'];
+      final item = uri.queryParameters['item'];
+      
+      final state = Provider.of<LedgerState>(context, listen: false);
+      
+      if (type == 'sale') {
+        if (item != null) {
+          String actualItem = "";
+          if (item == '1_rs_chakli') actualItem = "1 ₹ Chakli";
+          if (item == '5_rs_chakli') actualItem = "₹5 Chakli";
+          if (actualItem.isNotEmpty) {
+            state.quickStartRounds(actualItem);
+          }
+        }
+        setState(() {
+          _currentIndex = 1; // Sales Entry
+        });
+      } else if (type == 'expense') {
+        setState(() {
+          _currentIndex = 2; // Expenses
+        });
+      }
+    }
   }
 
   void _requestNotificationPermission() async {
