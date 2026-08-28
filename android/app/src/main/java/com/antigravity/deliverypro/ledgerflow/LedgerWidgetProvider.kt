@@ -18,60 +18,48 @@ class LedgerWidgetProvider : HomeWidgetProvider() {
     ) {
         appWidgetIds.forEach { widgetId ->
             val views = RemoteViews(context.packageName, R.layout.ledger_widget).apply {
-                
-                // Intent for Sell 1rs Chakli
-                val sell1rsIntent = Intent(context, MainActivity::class.java).apply {
-                    data = Uri.parse("ledgerflow://action?type=sale&item=1_rs_chakli")
-                    action = Intent.ACTION_VIEW
-                    flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP
-                }
-                val pendingSell1rs = PendingIntent.getActivity(context, 1, sell1rsIntent, PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE)
-                setOnClickPendingIntent(R.id.btn_sell_1rs, pendingSell1rs)
 
-                // Intent for Sell 5rs Chakli
-                val sell5rsIntent = Intent(context, MainActivity::class.java).apply {
-                    data = Uri.parse("ledgerflow://action?type=sale&item=5_rs_chakli")
-                    action = Intent.ACTION_VIEW
-                    flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP
+                // Helper to create pending intents
+                fun createPendingIntent(uriString: String, requestCode: Int): PendingIntent {
+                    val intent = Intent(context, MainActivity::class.java).apply {
+                        data = Uri.parse(uriString)
+                        action = Intent.ACTION_VIEW
+                        flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP
+                    }
+                    return PendingIntent.getActivity(
+                        context,
+                        requestCode,
+                        intent,
+                        PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+                    )
                 }
-                val pendingSell5rs = PendingIntent.getActivity(context, 2, sell5rsIntent, PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE)
-                setOnClickPendingIntent(R.id.btn_sell_5rs, pendingSell5rs)
 
-                // Intent for Custom New Sale
-                val newSaleIntent = Intent(context, MainActivity::class.java).apply {
-                    data = Uri.parse("ledgerflow://action?type=sale&item=custom")
-                    action = Intent.ACTION_VIEW
-                    flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP
-                }
-                val pendingNewSale = PendingIntent.getActivity(context, 3, newSaleIntent, PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE)
-                setOnClickPendingIntent(R.id.btn_new_sale, pendingNewSale)
+                // 1. Header Bar -> Summary Screen
+                setOnClickPendingIntent(R.id.header_bar, createPendingIntent("ledgerflow://action?type=summary", 101))
 
-                // Intent for Add Expense
-                val expenseIntent = Intent(context, MainActivity::class.java).apply {
-                    data = Uri.parse("ledgerflow://action?type=expense")
-                    action = Intent.ACTION_VIEW
-                    flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP
-                }
-                val pendingExpense = PendingIntent.getActivity(context, 4, expenseIntent, PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE)
-                setOnClickPendingIntent(R.id.btn_add_expense, pendingExpense)
+                // 2. Select Customer -> Sales Entry Screen
+                setOnClickPendingIntent(R.id.btn_select_customer, createPendingIntent("ledgerflow://action?type=sale&item=select_customer", 102))
 
-                // Intent for Clients List
-                val clientsIntent = Intent(context, MainActivity::class.java).apply {
-                    data = Uri.parse("ledgerflow://action?type=clients")
-                    action = Intent.ACTION_VIEW
-                    flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP
-                }
-                val pendingClients = PendingIntent.getActivity(context, 5, clientsIntent, PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE)
-                setOnClickPendingIntent(R.id.btn_clients, pendingClients)
+                // 3. + ₹200 Quick Sale Button
+                setOnClickPendingIntent(R.id.btn_sell_200, createPendingIntent("ledgerflow://action?type=sale&amount=200", 103))
 
-                // Intent for Summary
-                val summaryIntent = Intent(context, MainActivity::class.java).apply {
-                    data = Uri.parse("ledgerflow://action?type=summary")
-                    action = Intent.ACTION_VIEW
-                    flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP
-                }
-                val pendingSummary = PendingIntent.getActivity(context, 6, summaryIntent, PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE)
-                setOnClickPendingIntent(R.id.btn_summary, pendingSummary)
+                // 4. + ₹500 Quick Sale Button
+                setOnClickPendingIntent(R.id.btn_sell_500, createPendingIntent("ledgerflow://action?type=sale&amount=500", 104))
+
+                // 5. Custom Amount Button
+                setOnClickPendingIntent(R.id.btn_custom_amount, createPendingIntent("ledgerflow://action?type=sale&item=custom", 105))
+
+                // 6. Paid Filter Toggle
+                setOnClickPendingIntent(R.id.btn_status_paid, createPendingIntent("ledgerflow://action?type=sale&filter=paid", 106))
+
+                // 7. Not Paid Filter Toggle
+                setOnClickPendingIntent(R.id.btn_status_unpaid, createPendingIntent("ledgerflow://action?type=sale&filter=unpaid", 107))
+
+                // 8. Recent Delivery Card -> Client List Screen
+                setOnClickPendingIntent(R.id.btn_recent_delivery, createPendingIntent("ledgerflow://action?type=clients", 108))
+
+                // 9. Add Expense Button -> Expenses Screen
+                setOnClickPendingIntent(R.id.btn_add_expense, createPendingIntent("ledgerflow://action?type=expense", 109))
             }
             appWidgetManager.updateAppWidget(widgetId, views)
         }

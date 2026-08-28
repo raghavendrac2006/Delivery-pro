@@ -77,11 +77,15 @@ class _HomeShellState extends State<HomeShell> {
     if (uri.scheme == 'ledgerflow' && uri.host == 'action') {
       final type = uri.queryParameters['type'];
       final item = uri.queryParameters['item'];
+      final amount = uri.queryParameters['amount'];
       
       final state = Provider.of<LedgerState>(context, listen: false);
       
       if (type == 'sale') {
-        if (item != null && item != 'custom') {
+        if (amount != null) {
+          if (amount == '200') state.quickStartRounds("₹200 Quick Sale");
+          if (amount == '500') state.quickStartRounds("₹500 Quick Sale");
+        } else if (item != null && item != 'custom' && item != 'select_customer') {
           String actualItem = "";
           if (item == '1_rs_chakli') actualItem = "1 ₹ Chakli";
           if (item == '5_rs_chakli') actualItem = "₹5 Chakli";

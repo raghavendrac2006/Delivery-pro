@@ -1,129 +1,406 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
+    android:layout_height="wrap_content"
     android:orientation="vertical"
-    android:background="@drawable/widget_bg"
-    android:padding="14dp">
+    android:background="@drawable/widget_card_container">
 
-    <!-- Header Row -->
+    <!-- HEADER BAR -->
     <LinearLayout
+        android:id="@+id/header_bar"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
+        android:background="@drawable/widget_header_bg"
         android:gravity="center_vertical"
-        android:layout_marginBottom="12dp">
+        android:paddingLeft="14dp"
+        android:paddingTop="12dp"
+        android:paddingRight="14dp"
+        android:paddingBottom="12dp">
 
+        <!-- App Logo & Title -->
         <LinearLayout
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:orientation="vertical">
+            android:orientation="horizontal"
+            android:gravity="center_vertical">
+
+            <ImageView
+                android:layout_width="22dp"
+                android:layout_height="22dp"
+                android:src="@android:drawable/ic_menu_directions"
+                android:contentDescription="Delivery Pro Icon"
+                android:tint="#1E2476" />
 
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="LEDGERFLOW PRO"
+                android:text="Delivery Pro"
                 android:textStyle="bold"
-                android:textSize="14sp"
-                android:textColor="#FFFFFF"
+                android:textSize="16sp"
+                android:textColor="#0F172A"
+                android:layout_marginStart="8dp" />
+        </LinearLayout>
+
+        <!-- Today's Sales Stat -->
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:gravity="end">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="TODAY'S SALES"
+                android:textSize="10sp"
+                android:textStyle="bold"
+                android:textColor="#475569"
                 android:letterSpacing="0.05" />
 
             <TextView
+                android:id="@+id/widget_today_sales"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Quick Control Panel"
-                android:textSize="10sp"
-                android:textColor="#9CA3AF" />
+                android:text="₹8,450"
+                android:textStyle="bold"
+                android:textSize="16sp"
+                android:textColor="#1E2476" />
+        </LinearLayout>
+    </LinearLayout>
+
+    <!-- DIVIDER -->
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:background="#DCE0EB" />
+
+    <!-- MAIN BODY CONTENT -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="14dp">
+
+        <!-- QUICK LOG SECTION -->
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Quick Log"
+            android:textStyle="bold"
+            android:textSize="13sp"
+            android:textColor="#1E293B"
+            android:layout_marginBottom="8dp" />
+
+        <!-- Select Customer Dropdown Box -->
+        <LinearLayout
+            android:id="@+id/btn_select_customer"
+            android:layout_width="match_parent"
+            android:layout_height="42dp"
+            android:background="@drawable/widget_select_customer_bg"
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:paddingStart="12dp"
+            android:paddingEnd="12dp"
+            android:clickable="true"
+            android:focusable="true">
+
+            <ImageView
+                android:layout_width="18dp"
+                android:layout_height="18dp"
+                android:src="@android:drawable/ic_menu_myplaces"
+                android:tint="#1E293B"
+                android:contentDescription="Select Customer" />
+
+            <TextView
+                android:id="@+id/widget_selected_customer_text"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="Select Customer"
+                android:textStyle="bold"
+                android:textSize="13sp"
+                android:textColor="#1E293B"
+                android:layout_marginStart="8dp" />
+
+            <ImageView
+                android:layout_width="16dp"
+                android:layout_height="16dp"
+                android:src="@android:drawable/arrow_down_float"
+                android:tint="#1E293B"
+                android:contentDescription="Dropdown Arrow" />
         </LinearLayout>
 
-        <Button
-            android:id="@+id/btn_summary"
+        <!-- Quick Amount Buttons (+₹200 / +₹500) -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="44dp"
+            android:orientation="horizontal"
+            android:layout_marginTop="8dp">
+
+            <Button
+                android:id="@+id/btn_sell_200"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:text="+ ₹200"
+                android:textStyle="bold"
+                android:textSize="13sp"
+                android:textColor="#FFFFFF"
+                android:background="@drawable/widget_btn_navy"
+                android:layout_marginEnd="4dp" />
+
+            <Button
+                android:id="@+id/btn_sell_500"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:text="+ ₹500"
+                android:textStyle="bold"
+                android:textSize="13sp"
+                android:textColor="#FFFFFF"
+                android:background="@drawable/widget_btn_navy"
+                android:layout_marginStart="4dp" />
+        </LinearLayout>
+
+        <!-- Custom Amount Button -->
+        <LinearLayout
+            android:id="@+id/btn_custom_amount"
+            android:layout_width="match_parent"
+            android:layout_height="42dp"
+            android:background="@drawable/widget_btn_custom_amount"
+            android:orientation="horizontal"
+            android:gravity="center"
+            android:layout_marginTop="8dp"
+            android:clickable="true"
+            android:focusable="true">
+
+            <ImageView
+                android:layout_width="16dp"
+                android:layout_height="16dp"
+                android:src="@android:drawable/ic_menu_edit"
+                android:tint="#0F172A"
+                android:contentDescription="Edit Custom Amount" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Custom Amount"
+                android:textStyle="bold"
+                android:textSize="13sp"
+                android:textColor="#0F172A"
+                android:layout_marginStart="6dp" />
+        </LinearLayout>
+
+        <!-- DIVIDER -->
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:background="#E2E4EE"
+            android:layout_marginTop="12dp"
+            android:layout_marginBottom="12dp" />
+
+        <!-- PAYMENT STATUS ROW -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center_vertical">
+
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="Payment Status"
+                android:textStyle="bold"
+                android:textSize="13sp"
+                android:textColor="#1E293B" />
+
+            <!-- Segmented Control Toggle -->
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:background="@drawable/widget_toggle_bg"
+                android:orientation="horizontal"
+                android:padding="3dp">
+
+                <TextView
+                    android:id="@+id/btn_status_paid"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Paid"
+                    android:textStyle="bold"
+                    android:textSize="11sp"
+                    android:textColor="#0F172A"
+                    android:background="@drawable/widget_toggle_active"
+                    android:paddingStart="12dp"
+                    android:paddingTop="5dp"
+                    android:paddingEnd="12dp"
+                    android:paddingBottom="5dp"
+                    android:clickable="true"
+                    android:focusable="true" />
+
+                <TextView
+                    android:id="@+id/btn_status_unpaid"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Not Paid"
+                    android:textStyle="bold"
+                    android:textSize="11sp"
+                    android:textColor="#475569"
+                    android:paddingStart="10dp"
+                    android:paddingTop="5dp"
+                    android:paddingEnd="10dp"
+                    android:paddingBottom="5dp"
+                    android:clickable="true"
+                    android:focusable="true" />
+            </LinearLayout>
+        </LinearLayout>
+
+        <!-- DIVIDER -->
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:background="#E2E4EE"
+            android:layout_marginTop="12dp"
+            android:layout_marginBottom="12dp" />
+
+        <!-- RECENT DELIVERY SECTION -->
+        <TextView
             android:layout_width="wrap_content"
-            android:layout_height="32dp"
-            android:text="Summary"
+            android:layout_height="wrap_content"
+            android:text="RECENT DELIVERY"
             android:textSize="10sp"
             android:textStyle="bold"
-            android:textColor="#FFFFFF"
-            android:background="@drawable/widget_btn_dark"
-            android:paddingStart="12dp"
-            android:paddingEnd="12dp" />
-    </LinearLayout>
+            android:textColor="#475569"
+            android:letterSpacing="0.05"
+            android:layout_marginBottom="6dp" />
 
-    <!-- Top Action Row: Quick Sales -->
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="40dp"
-        android:orientation="horizontal"
-        android:layout_marginBottom="8dp">
+        <!-- Recent Delivery Row Card -->
+        <LinearLayout
+            android:id="@+id/btn_recent_delivery"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@drawable/widget_recent_delivery_bg"
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:padding="10dp"
+            android:clickable="true"
+            android:focusable="true">
 
-        <Button
-            android:id="@+id/btn_sell_1rs"
-            android:layout_width="0dp"
-            android:layout_height="match_parent"
-            android:layout_weight="1"
-            android:text="+ ₹1 Chakli"
-            android:textSize="11sp"
-            android:textStyle="bold"
-            android:textColor="#FFFFFF"
-            android:background="@drawable/widget_btn_blue"
-            android:layout_marginEnd="4dp" />
+            <!-- Initials Avatar -->
+            <FrameLayout
+                android:layout_width="38dp"
+                android:layout_height="38dp"
+                android:background="@drawable/widget_avatar_bg">
 
-        <Button
-            android:id="@+id/btn_sell_5rs"
-            android:layout_width="0dp"
-            android:layout_height="match_parent"
-            android:layout_weight="1"
-            android:text="+ ₹5 Chakli"
-            android:textSize="11sp"
-            android:textStyle="bold"
-            android:textColor="#FFFFFF"
-            android:background="@drawable/widget_btn_green"
-            android:layout_marginStart="2dp"
-            android:layout_marginEnd="2dp" />
+                <TextView
+                    android:id="@+id/recent_initials"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center"
+                    android:text="SJ"
+                    android:textStyle="bold"
+                    android:textSize="12sp"
+                    android:textColor="#0284C7" />
+            </FrameLayout>
 
-        <Button
-            android:id="@+id/btn_new_sale"
-            android:layout_width="0dp"
-            android:layout_height="match_parent"
-            android:layout_weight="1"
-            android:text="+ New Sale"
-            android:textSize="11sp"
-            android:textStyle="bold"
-            android:textColor="#FFFFFF"
-            android:background="@drawable/widget_btn_dark"
-            android:layout_marginStart="4dp" />
-    </LinearLayout>
+            <!-- Customer Details -->
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:orientation="vertical"
+                android:layout_marginStart="10dp">
 
-    <!-- Bottom Action Row: Expenses & Navigation -->
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="40dp"
-        android:orientation="horizontal">
+                <TextView
+                    android:id="@+id/recent_customer_name"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Sarah Jenkins"
+                    android:textStyle="bold"
+                    android:textSize="13sp"
+                    android:textColor="#0F172A" />
 
-        <Button
+                <TextView
+                    android:id="@+id/recent_subtext"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="10:42 AM • Order #409"
+                    android:textSize="10sp"
+                    android:textColor="#64748B" />
+            </LinearLayout>
+
+            <!-- Amount & Badge -->
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:gravity="end">
+
+                <TextView
+                    android:id="@+id/recent_amount"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="₹750"
+                    android:textStyle="bold"
+                    android:textSize="14sp"
+                    android:textColor="#0F172A" />
+
+                <TextView
+                    android:id="@+id/recent_paid_badge"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="PAID"
+                    android:textStyle="bold"
+                    android:textSize="9sp"
+                    android:textColor="#16A34A"
+                    android:background="@drawable/widget_paid_badge"
+                    android:paddingStart="6dp"
+                    android:paddingTop="2dp"
+                    android:paddingEnd="6dp"
+                    android:paddingBottom="2dp"
+                    android:layout_marginTop="2dp" />
+            </LinearLayout>
+        </LinearLayout>
+
+        <!-- DIVIDER -->
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:background="#E2E4EE"
+            android:layout_marginTop="12dp"
+            android:layout_marginBottom="12dp" />
+
+        <!-- ADD EXPENSE BUTTON -->
+        <LinearLayout
             android:id="@+id/btn_add_expense"
-            android:layout_width="0dp"
-            android:layout_height="match_parent"
-            android:layout_weight="1"
-            android:text="+ Expense"
-            android:textSize="11sp"
-            android:textStyle="bold"
-            android:textColor="#FFFFFF"
-            android:background="@drawable/widget_btn_red"
-            android:layout_marginEnd="4dp" />
+            android:layout_width="match_parent"
+            android:layout_height="42dp"
+            android:background="@drawable/widget_btn_add_expense"
+            android:orientation="horizontal"
+            android:gravity="center"
+            android:clickable="true"
+            android:focusable="true">
 
-        <Button
-            android:id="@+id/btn_clients"
-            android:layout_width="0dp"
-            android:layout_height="match_parent"
-            android:layout_weight="1.2"
-            android:text="Clients List"
-            android:textSize="11sp"
-            android:textStyle="bold"
-            android:textColor="#FFFFFF"
-            android:background="@drawable/widget_btn_dark"
-            android:layout_marginStart="4dp" />
+            <ImageView
+                android:layout_width="16dp"
+                android:layout_height="16dp"
+                android:src="@android:drawable/ic_menu_agenda"
+                android:tint="#334155"
+                android:contentDescription="Add Expense Icon" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Add Expense"
+                android:textStyle="bold"
+                android:textSize="13sp"
+                android:textColor="#334155"
+                android:layout_marginStart="8dp" />
+        </LinearLayout>
+
     </LinearLayout>
 
 </LinearLayout>

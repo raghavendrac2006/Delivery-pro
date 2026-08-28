@@ -1,6 +1,6 @@
 {
-    "latest_version": "1.1.9",
-    "build_number": 21,
-    "apk_url": "https://github.com/raghavendrac2006/Ledger-Flow/releases/download/v1.1.9/app-release.apk",
-    "release_notes": "Upgraded Home Screen Widget to full-width control panel with all quick operations (+ ₹1 Chakli, + ₹5 Chakli, + New Sale, + Expense, Clients, Summary)."
+    "latest_version": "1.2.0",
+    "build_number": 22,
+    "apk_url": "https://github.com/raghavendrac2006/Ledger-Flow/releases/download/v1.2.0/app-release.apk",
+    "release_notes": "Implemented custom Delivery Pro home screen widget matching exact UI specifications."
 }
