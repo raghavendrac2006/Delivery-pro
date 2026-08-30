@@ -1370,6 +1370,7 @@ class LedgerState extends ChangeNotifier {
   Future<void> deleteExpense(String expenseId) async {
     try {
       await expenseRepository.deleteExpense(expenseId);
+      _expenses.removeWhere((e) => e.expenseId == expenseId);
       notifyListeners();
     } catch (e) {
       debugPrint("Error deleting expense: $e");
@@ -1404,12 +1405,51 @@ class LedgerState extends ChangeNotifier {
   final List<DailyUsage> _dailyUsages = [];
   List<DailyUsage> get dailyUsages => _dailyUsages;
 
-  // Active bag getter
+  // Active bag getter (default / first active)
   RiceBag? get activeRiceBag {
     try {
       return _riceBags.firstWhere((bag) => bag.status == "Active");
     } catch (_) {
       return null;
+    }
+  }
+
+  // Active bag getter for specific flour type
+  RiceBag? activeRiceBagForType(String flourType) {
+    try {
+      return _riceBags.firstWhere(
+        (bag) => bag.status == "Active" && bag.flourType.toLowerCase() == flourType.toLowerCase(),
+      );
+    } catch (_) {
+      return activeRiceBag;
+    }
+  }
+
+  double remainingKgForType(String flourType) {
+    final bag = activeRiceBagForType(flourType);
+    return bag?.remainingKg ?? 0.0;
+  }
+
+  List<String> get availableFlourTypes {
+    final types = <String>{"₹1 Rice Flour", "₹5 Rice Flour"};
+    for (var bag in _riceBags) {
+      if (bag.flourType.isNotEmpty) {
+        types.add(bag.flourType);
+      }
+    }
+    return types.toList();
+  }
+
+  // Admin Methods for Deletions
+  Future<void> deleteCustomer(String customerName) async {
+    try {
+      final cleanName = toSentenceCase(customerName);
+      await customerRepository.deleteCustomer(cleanName);
+      _customers.removeWhere((c) => c.name.toLowerCase() == cleanName.toLowerCase());
+      _customerTransactions.remove(cleanName);
+      notifyListeners();
+    } catch (e) {
+      debugPrint("Error deleting customer: $e");
     }
   }
 
@@ -1508,10 +1548,11 @@ class LedgerState extends ChangeNotifier {
     required double totalKg,
     required double cost,
     required String date,
+    String flourType = "₹1 Rice Flour",
   }) async {
-    // 1. Mark previous active bags completed with final financials saved
+    // 1. Mark previous active bag for this specific flour type as completed
     for (var bag in _riceBags) {
-      if (bag.status == "Active") {
+      if (bag.status == "Active" && bag.flourType.toLowerCase() == flourType.toLowerCase()) {
         await _completeBag(bag, date, {});
       }
     }
@@ -1524,10 +1565,11 @@ class LedgerState extends ChangeNotifier {
       nextBagNum = maxNum + 1;
     }
 
-    // 3. Instantiate new active bag
+    // 3. Instantiate new active bag for specified flour type
     final bagId = "BAG_${DateTime.now().millisecondsSinceEpoch}";
     await riceBagRepository.saveRiceBag(RiceBag(
       bagId: bagId,
+      flourType: flourType,
       totalKg: totalKg,
       usedKg: 0.0,
       remainingKg: totalKg,
@@ -1541,14 +1583,16 @@ class LedgerState extends ChangeNotifier {
   Future<void> addDailyUsage({
     required double usedKg,
     required String date,
+    String flourType = "₹1 Rice Flour",
   }) async {
-    final activeBag = activeRiceBag;
+    final activeBag = activeRiceBagForType(flourType) ?? activeRiceBag;
     if (activeBag == null) return;
 
     final usageId = "USE_${DateTime.now().millisecondsSinceEpoch}";
     await riceBagRepository.addDailyUsage(DailyUsage(
       usageId: usageId,
       bagId: activeBag.bagId,
+      flourType: flourType,
       date: date,
       usedKg: usedKg,
     ));
@@ -1566,9 +1610,10 @@ class LedgerState extends ChangeNotifier {
   Future<void> closeAndStartNewBag({
     required double totalKg,
     required String date,
+    String flourType = "₹1 Rice Flour",
   }) async {
-    // Complete active bag
-    final activeBag = activeRiceBag;
+    // Complete active bag for this flour type
+    final activeBag = activeRiceBagForType(flourType) ?? activeRiceBag;
     if (activeBag != null) {
       await _completeBag(activeBag, date, {});
     }
@@ -1581,10 +1626,11 @@ class LedgerState extends ChangeNotifier {
       nextBagNum = maxNum + 1;
     }
 
-    // Start a new bag with zero cost
+    // Start a new bag with zero cost for specified flour type
     final bagId = "BAG_${DateTime.now().millisecondsSinceEpoch}";
     await riceBagRepository.saveRiceBag(RiceBag(
       bagId: bagId,
+      flourType: flourType,
       totalKg: totalKg,
       usedKg: 0.0,
       remainingKg: totalKg,

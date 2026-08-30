@@ -7,6 +7,7 @@ import '../widgets/bento_card.dart';
 import 'customer_profile_screen.dart';
 import '../widgets/animated_list_item.dart';
 import '../widgets/empty_state_widget.dart';
+import '../widgets/custom_toast.dart';
 
 class ClientListScreen extends StatefulWidget {
   const ClientListScreen({super.key});
@@ -429,6 +430,49 @@ class _ClientListScreenState extends State<ClientListScreen> {
                                           builder: (context) => CustomerProfileScreen(
                                             customerName: customer.name,
                                           ),
+                                        ),
+                                      );
+                                    },
+                                    onLongPress: () {
+                                      showDialog(
+                                        context: context,
+                                        builder: (dialogCtx) => AlertDialog(
+                                          shape: RoundedRectangleBorder(
+                                            borderRadius: BorderRadius.circular(AppTheme.radiusLg),
+                                            side: const BorderSide(color: AppTheme.outlineVariant, width: 1.0),
+                                          ),
+                                          backgroundColor: Colors.white,
+                                          title: Row(
+                                            children: [
+                                              const Icon(Icons.delete_forever, color: AppTheme.error),
+                                              const SizedBox(width: 8.0),
+                                              Text("DELETE CUSTOMER", style: AppTheme.headlineMd.copyWith(fontSize: 18.0)),
+                                            ],
+                                          ),
+                                          content: Text(
+                                            "Delete '${customer.name}' completely? This will wipe all account history for this customer.",
+                                            style: const TextStyle(fontSize: 14.0, color: AppTheme.onSurface),
+                                          ),
+                                          actions: [
+                                            TextButton(
+                                              onPressed: () => Navigator.pop(dialogCtx),
+                                              child: Text("CANCEL", style: AppTheme.labelBold.copyWith(color: AppTheme.outline)),
+                                            ),
+                                            ElevatedButton(
+                                              style: ElevatedButton.styleFrom(
+                                                backgroundColor: AppTheme.error,
+                                                foregroundColor: Colors.white,
+                                              ),
+                                              onPressed: () async {
+                                                Navigator.pop(dialogCtx);
+                                                await state.deleteCustomer(customer.name);
+                                                if (context.mounted) {
+                                                  CustomToast.showSuccess(context, "CUSTOMER DELETED");
+                                                }
+                                              },
+                                              child: const Text("DELETE"),
+                                            ),
+                                          ],
                                         ),
                                       );
                                     },

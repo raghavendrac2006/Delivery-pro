@@ -17,6 +17,7 @@ class SetupScreen extends StatefulWidget {
 class _SetupScreenState extends State<SetupScreen> {
   bool _isStarting = false;
   final TextEditingController _riceUsageController = TextEditingController();
+  String _selectedFlourType = "₹1 Rice Flour";
 
   @override
   void dispose() {
@@ -25,7 +26,7 @@ class _SetupScreenState extends State<SetupScreen> {
   }
 
   void _showUsageHistoryDialog(BuildContext context, LedgerState state) {
-    final activeBag = state.activeRiceBag;
+    final activeBag = state.activeRiceBagForType(_selectedFlourType) ?? state.activeRiceBag;
     if (activeBag == null) return;
 
     final usages = state.dailyUsages.where((u) => u.bagId == activeBag.bagId).toList();
@@ -359,7 +360,8 @@ class _SetupScreenState extends State<SetupScreen> {
               const SizedBox(height: 8.0),
               GestureDetector(
                 onLongPress: () {
-                  if (state.activeRiceBag != null) {
+                  final activeBag = state.activeRiceBagForType(_selectedFlourType) ?? state.activeRiceBag;
+                  if (activeBag != null) {
                     _showUsageHistoryDialog(context, state);
                   }
                 },
@@ -368,96 +370,138 @@ class _SetupScreenState extends State<SetupScreen> {
                   backgroundColor: AppTheme.surface,
                   borderRadius: AppTheme.radiusLg,
                   shadowStyle: ShadowStyle.light,
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      if (state.activeRiceBag == null) ...[
-                        Row(
-                          children: [
-                            const Icon(Icons.warning_amber_rounded, color: AppTheme.error, size: 24.0),
-                            const SizedBox(width: 16.0),
-                            Expanded(
-                              child: Text(
-                                "No active rice flour bag cycle started yet. Go to Summary tab and click 'Start New Bag Cycle' to initialize a bag.",
-                                style: AppTheme.labelSm.copyWith(color: AppTheme.error, fontWeight: FontWeight.bold),
+                  child: Builder(
+                    builder: (context) {
+                      final activeBag = state.activeRiceBagForType(_selectedFlourType) ?? state.activeRiceBag;
+                      return Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          // Flour Type Selector Row
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Text(
+                                "FLOUR TYPE:",
+                                style: AppTheme.labelBold.copyWith(fontSize: 10.0, color: AppTheme.onSurfaceVariant),
                               ),
-                            ),
-                          ],
-                        ),
-                      ] else ...[
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Expanded(
-                              child: Text(
-                                "ACTIVE BAG STATUS (LONG PRESS FOR LOGS)",
-                                style: AppTheme.labelSm.copyWith(
-                                  color: AppTheme.onSurfaceVariant,
-                                  fontWeight: FontWeight.bold,
-                                  fontSize: 9.5,
-                                ),
+                              DropdownButton<String>(
+                                value: state.availableFlourTypes.contains(_selectedFlourType)
+                                    ? _selectedFlourType
+                                    : state.availableFlourTypes.first,
+                                underline: const SizedBox(),
+                                icon: const Icon(Icons.arrow_drop_down, color: AppTheme.primary),
+                                items: state.availableFlourTypes.map((t) {
+                                  return DropdownMenuItem<String>(
+                                    value: t,
+                                    child: Text(
+                                      t,
+                                      style: AppTheme.labelBold.copyWith(fontSize: 12.0, color: AppTheme.primary),
+                                    ),
+                                  );
+                                }).toList(),
+                                onChanged: (val) {
+                                  if (val != null) {
+                                    setState(() {
+                                      _selectedFlourType = val;
+                                    });
+                                  }
+                                },
                               ),
-                            ),
-                            const SizedBox(width: 8.0),
-                            Container(
-                              padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 2.0),
-                              decoration: BoxDecoration(
-                                color: AppTheme.primary.withValues(alpha: 0.1),
-                                borderRadius: BorderRadius.circular(AppTheme.radiusSm),
-                                border: Border.all(color: AppTheme.primary, width: 1.0),
-                              ),
-                              child: Text(
-                                "ACTIVE",
-                                style: AppTheme.labelBold.copyWith(fontSize: 9.0, color: AppTheme.primary),
-                              ),
-                            ),
-                          ],
-                        ),
-                        const SizedBox(height: 16.0),
-                        Row(
-                          children: [
-                            _buildBagMetric("TOTAL KG", "${state.activeRiceBag!.totalKg.toStringAsFixed(0)} KG"),
-                            _buildSeparator(),
-                            _buildBagMetric("USED", "${state.activeRiceBag!.usedKg.toStringAsFixed(1)} KG"),
-                            _buildSeparator(),
-                            _buildBagMetric("REMAINING", "${state.activeRiceBag!.remainingKg.toStringAsFixed(1)} KG", isHighlighted: true),
-                          ],
-                        ),
-                        const SizedBox(height: 20.0),
-                        const Divider(color: AppTheme.outlineVariant, height: 1),
-                        const SizedBox(height: 16.0),
-                        Text(
-                          "HOW MANY KG OF RICE FLOUR USED TODAY?",
-                          style: AppTheme.labelBold.copyWith(fontSize: 10.0, color: AppTheme.onSurface),
-                        ),
-                        const SizedBox(height: 10.0),
-                        TextField(
-                          controller: _riceUsageController,
-                          keyboardType: const TextInputType.numberWithOptions(decimal: true),
-                          decoration: InputDecoration(
-                            hintText: "e.g., 7.0",
-                            suffixText: "KG",
-                            suffixStyle: AppTheme.labelBold.copyWith(color: AppTheme.onSurface),
-                            filled: true,
-                            fillColor: AppTheme.surfaceContainerHighest,
-                            border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(AppTheme.radiusSm),
-                              borderSide: const BorderSide(color: AppTheme.outlineVariant, width: 1.0),
-                            ),
-                            enabledBorder: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(AppTheme.radiusSm),
-                              borderSide: const BorderSide(color: AppTheme.outlineVariant, width: 1.0),
-                            ),
-                            focusedBorder: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(AppTheme.radiusSm),
-                              borderSide: const BorderSide(color: AppTheme.primary, width: 2.0),
-                            ),
-                            contentPadding: const EdgeInsets.symmetric(horizontal: 14.0, vertical: 12.0),
+                            ],
                           ),
-                          style: AppTheme.headlineMd.copyWith(fontSize: 18.0),
-                        ),
-                      ],
-                    ],
+                          const SizedBox(height: 12.0),
+                          const Divider(color: AppTheme.outlineVariant, height: 1),
+                          const SizedBox(height: 12.0),
+
+                          if (activeBag == null) ...[
+                            Row(
+                              children: [
+                                const Icon(Icons.warning_amber_rounded, color: AppTheme.error, size: 24.0),
+                                const SizedBox(width: 16.0),
+                                Expanded(
+                                  child: Text(
+                                    "No active bag cycle for $_selectedFlourType. Go to Summary tab and click 'Start New Bag Cycle' to add a bag.",
+                                    style: AppTheme.labelSm.copyWith(color: AppTheme.error, fontWeight: FontWeight.bold),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ] else ...[
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Expanded(
+                                  child: Text(
+                                    "BAG #${state.getBagNumber(activeBag)} STATUS (LONG PRESS FOR LOGS)",
+                                    style: AppTheme.labelSm.copyWith(
+                                      color: AppTheme.onSurfaceVariant,
+                                      fontWeight: FontWeight.bold,
+                                      fontSize: 9.5,
+                                    ),
+                                  ),
+                                ),
+                                const SizedBox(width: 8.0),
+                                Container(
+                                  padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 2.0),
+                                  decoration: BoxDecoration(
+                                    color: AppTheme.primary.withValues(alpha: 0.1),
+                                    borderRadius: BorderRadius.circular(AppTheme.radiusSm),
+                                    border: Border.all(color: AppTheme.primary, width: 1.0),
+                                  ),
+                                  child: Text(
+                                    "ACTIVE",
+                                    style: AppTheme.labelBold.copyWith(fontSize: 9.0, color: AppTheme.primary),
+                                  ),
+                                ),
+                              ],
+                            ),
+                            const SizedBox(height: 16.0),
+                            Row(
+                              children: [
+                                _buildBagMetric("TOTAL KG", "${activeBag.totalKg.toStringAsFixed(0)} KG"),
+                                _buildSeparator(),
+                                _buildBagMetric("USED", "${activeBag.usedKg.toStringAsFixed(1)} KG"),
+                                _buildSeparator(),
+                                _buildBagMetric("REMAINING", "${activeBag.remainingKg.toStringAsFixed(1)} KG", isHighlighted: true),
+                              ],
+                            ),
+                            const SizedBox(height: 20.0),
+                            const Divider(color: AppTheme.outlineVariant, height: 1),
+                            const SizedBox(height: 16.0),
+                            Text(
+                              "HOW MANY KG OF $_selectedFlourType USED TODAY?",
+                              style: AppTheme.labelBold.copyWith(fontSize: 10.0, color: AppTheme.onSurface),
+                            ),
+                            const SizedBox(height: 10.0),
+                            TextField(
+                              controller: _riceUsageController,
+                              keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                              decoration: InputDecoration(
+                                hintText: "e.g., 7.0",
+                                suffixText: "KG",
+                                suffixStyle: AppTheme.labelBold.copyWith(color: AppTheme.onSurface),
+                                filled: true,
+                                fillColor: AppTheme.surfaceContainerHighest,
+                                border: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(AppTheme.radiusSm),
+                                  borderSide: const BorderSide(color: AppTheme.outlineVariant, width: 1.0),
+                                ),
+                                enabledBorder: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(AppTheme.radiusSm),
+                                  borderSide: const BorderSide(color: AppTheme.outlineVariant, width: 1.0),
+                                ),
+                                focusedBorder: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(AppTheme.radiusSm),
+                                  borderSide: const BorderSide(color: AppTheme.primary, width: 2.0),
+                                ),
+                                contentPadding: const EdgeInsets.symmetric(horizontal: 14.0, vertical: 12.0),
+                              ),
+                              style: AppTheme.headlineMd.copyWith(fontSize: 18.0),
+                            ),
+                          ],
+                        ],
+                      );
+                    },
                   ),
                 ),
               ),
@@ -888,7 +932,7 @@ class _SetupScreenState extends State<SetupScreen> {
 
     if (usageKg > 0.0) {
       final formattedDate = DateFormat('dd MMMM yyyy').format(state.deliveryDate);
-      state.addDailyUsage(usedKg: usageKg, date: formattedDate);
+      state.addDailyUsage(usedKg: usageKg, date: formattedDate, flourType: _selectedFlourType);
     }
 
     Future.delayed(const Duration(milliseconds: 600), () {

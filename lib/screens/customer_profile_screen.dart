@@ -45,6 +45,56 @@ class CustomerProfileScreen extends StatelessWidget {
           "Customer Profile",
           style: AppTheme.headlineMd.copyWith(color: AppTheme.primary, fontSize: 18.0),
         ),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.delete_forever, color: AppTheme.error),
+            tooltip: "Delete Customer",
+            onPressed: () {
+              showDialog(
+                context: context,
+                builder: (dialogCtx) => AlertDialog(
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(AppTheme.radiusLg),
+                    side: const BorderSide(color: AppTheme.outlineVariant, width: 1.0),
+                  ),
+                  backgroundColor: Colors.white,
+                  title: Row(
+                    children: [
+                      const Icon(Icons.delete_forever, color: AppTheme.error),
+                      const SizedBox(width: 8.0),
+                      Text("DELETE CUSTOMER", style: AppTheme.headlineMd.copyWith(fontSize: 18.0)),
+                    ],
+                  ),
+                  content: Text(
+                    "Are you sure you want to completely delete '$customerName'?\n\nThis action cannot be undone and will delete all account ledger history.",
+                    style: const TextStyle(fontSize: 14.0, color: AppTheme.onSurface),
+                  ),
+                  actions: [
+                    TextButton(
+                      onPressed: () => Navigator.pop(dialogCtx),
+                      child: Text("CANCEL", style: AppTheme.labelBold.copyWith(color: AppTheme.outline)),
+                    ),
+                    ElevatedButton(
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: AppTheme.error,
+                        foregroundColor: Colors.white,
+                      ),
+                      onPressed: () async {
+                        Navigator.pop(dialogCtx);
+                        await state.deleteCustomer(customerName);
+                        if (context.mounted) {
+                          Navigator.pop(context);
+                          CustomToast.showSuccess(context, "CUSTOMER DELETED");
+                        }
+                      },
+                      child: const Text("DELETE"),
+                    ),
+                  ],
+                ),
+              );
+            },
+          ),
+        ],
         bottom: PreferredSize(
           preferredSize: const Size.fromHeight(1.5),
           child: Container(

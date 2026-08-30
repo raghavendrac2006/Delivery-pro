@@ -848,7 +848,7 @@ class _SummaryScreenState extends State<SummaryScreen> {
                         ),
                         const SizedBox(height: 16.0),
                         InkWell(
-                          onTap: () => _showStartNewBagDialog(context, state),
+                          onTap: () => _showNewBagModal(context, state),
                           child: Container(
                             width: double.infinity,
                             padding: const EdgeInsets.symmetric(vertical: 16.0),
@@ -1043,81 +1043,139 @@ class _SummaryScreenState extends State<SummaryScreen> {
     );
   }
 
-  void _showStartNewBagDialog(BuildContext context, LedgerState state) {
-    final TextEditingController kgCont = TextEditingController();
+  void _showNewBagModal(BuildContext context, LedgerState state) {
+    final kgCont = TextEditingController();
+    String selectedFlourType = "₹1 Rice Flour";
+    final customTypeCont = TextEditingController();
+    bool isCustomType = false;
 
     showDialog(
       context: context,
       builder: (context) {
-        return AlertDialog(
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(AppTheme.radiusLg),
-            side: const BorderSide(color: AppTheme.outlineVariant, width: 1.0),
-          ),
-          backgroundColor: Colors.white,
-          title: Row(
-            children: [
-              const Icon(Icons.scale, color: AppTheme.primary),
-              const SizedBox(width: 8.0),
-              Text(
-                "START NEW BAG CYCLE",
-                style: AppTheme.headlineMd.copyWith(fontSize: 18.0),
+        return StatefulBuilder(
+          builder: (context, setModalState) {
+            return AlertDialog(
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(AppTheme.radiusLg),
+                side: const BorderSide(color: AppTheme.outlineVariant, width: 1.0),
               ),
-            ],
-          ),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const Text(
-                "This will close the current active bag cycle and start a fresh one. You can enter any custom weight size.",
-                style: TextStyle(fontSize: 13.0, color: AppTheme.onSurfaceVariant),
+              backgroundColor: Colors.white,
+              title: Row(
+                children: [
+                  const Icon(Icons.scale, color: AppTheme.primary),
+                  const SizedBox(width: 8.0),
+                  Text(
+                    "START NEW BAG CYCLE",
+                    style: AppTheme.headlineMd.copyWith(fontSize: 18.0),
+                  ),
+                ],
               ),
-              const SizedBox(height: 16.0),
-              TextField(
-                controller: kgCont,
-                keyboardType: const TextInputType.numberWithOptions(decimal: true),
-                decoration: InputDecoration(
-                  labelText: "NEW BAG CAPACITY (KG)",
-                  labelStyle: AppTheme.labelBold.copyWith(fontSize: 10, color: AppTheme.outline),
-                  hintText: "e.g., 30, 45, 60...",
-                  suffixText: "KG",
-                  suffixStyle: AppTheme.labelBold.copyWith(color: AppTheme.onSurface),
+              content: SingleChildScrollView(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Text(
+                      "Select the type of rice flour and enter the bag capacity in KG.",
+                      style: TextStyle(fontSize: 13.0, color: AppTheme.onSurfaceVariant),
+                    ),
+                    const SizedBox(height: 16.0),
+                    // Flour Type Dropdown
+                    Text(
+                      "FLOUR TYPE",
+                      style: AppTheme.labelBold.copyWith(fontSize: 10, color: AppTheme.outline),
+                    ),
+                    const SizedBox(height: 4.0),
+                    DropdownButtonFormField<String>(
+                      initialValue: selectedFlourType,
+                      items: [
+                        const DropdownMenuItem(value: "₹1 Rice Flour", child: Text("₹1 Rice Flour (1rs Chakli)")),
+                        const DropdownMenuItem(value: "₹5 Rice Flour", child: Text("₹5 Rice Flour (5rs Chakli)")),
+                        const DropdownMenuItem(value: "CUSTOM", child: Text("+ Add Custom Flour Type")),
+                      ],
+                      onChanged: (val) {
+                        if (val != null) {
+                          setModalState(() {
+                            selectedFlourType = val;
+                            isCustomType = (val == "CUSTOM");
+                          });
+                        }
+                      },
+                      decoration: InputDecoration(
+                        filled: true,
+                        fillColor: AppTheme.surfaceContainerHighest,
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(AppTheme.radiusSm),
+                          borderSide: const BorderSide(color: AppTheme.outlineVariant),
+                        ),
+                      ),
+                    ),
+                    if (isCustomType) ...[
+                      const SizedBox(height: 12.0),
+                      TextField(
+                        controller: customTypeCont,
+                        decoration: InputDecoration(
+                          labelText: "CUSTOM FLOUR NAME",
+                          hintText: "e.g., Premium Special Flour",
+                          filled: true,
+                          fillColor: AppTheme.surfaceContainerHighest,
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(AppTheme.radiusSm),
+                          ),
+                        ),
+                      ),
+                    ],
+                    const SizedBox(height: 16.0),
+                    TextField(
+                      controller: kgCont,
+                      keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                      decoration: InputDecoration(
+                        labelText: "NEW BAG CAPACITY (KG)",
+                        labelStyle: AppTheme.labelBold.copyWith(fontSize: 10, color: AppTheme.outline),
+                        hintText: "e.g., 30, 40, 50...",
+                        suffixText: "KG",
+                        suffixStyle: AppTheme.labelBold.copyWith(color: AppTheme.onSurface),
+                      ),
+                      style: AppTheme.bodyLg,
+                    ),
+                  ],
                 ),
-                style: AppTheme.bodyLg,
               ),
-            ],
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(context),
-              child: Text(
-                "CANCEL",
-                style: AppTheme.labelBold.copyWith(color: AppTheme.outline),
-              ),
-            ),
-            Container(
-              decoration: BoxDecoration(
-                color: AppTheme.primary,
-                borderRadius: BorderRadius.circular(AppTheme.radiusSm),
-              ),
-              child: TextButton(
-                onPressed: () {
-                  final kg = double.tryParse(kgCont.text.trim());
-                  if (kg != null && kg > 0.0) {
-                    final dateStr = DateFormat('dd MMMM yyyy').format(DateTime.now());
-                    state.closeAndStartNewBag(totalKg: kg, date: dateStr);
-                    Navigator.pop(context);
-                    CustomToast.showSuccess(context, "NEW BAG CYCLE STARTED: $kg KG");
-                  }
-                },
-                child: Text(
-                  "START BAG",
-                  style: AppTheme.labelBold.copyWith(color: Colors.white),
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.pop(context),
+                  child: Text(
+                    "CANCEL",
+                    style: AppTheme.labelBold.copyWith(color: AppTheme.outline),
+                  ),
                 ),
-              ),
-            ),
-          ],
+                Container(
+                  decoration: BoxDecoration(
+                    color: AppTheme.primary,
+                    borderRadius: BorderRadius.circular(AppTheme.radiusSm),
+                  ),
+                  child: TextButton(
+                    onPressed: () {
+                      final kg = double.tryParse(kgCont.text.trim());
+                      final type = isCustomType
+                          ? customTypeCont.text.trim()
+                          : selectedFlourType;
+                      if (kg != null && kg > 0.0 && type.isNotEmpty) {
+                        final dateStr = DateFormat('dd MMMM yyyy').format(DateTime.now());
+                        state.closeAndStartNewBag(totalKg: kg, date: dateStr, flourType: type);
+                        Navigator.pop(context);
+                        CustomToast.showSuccess(context, "STARTED $kg KG BAG FOR $type");
+                      }
+                    },
+                    child: Text(
+                      "START BAG",
+                      style: AppTheme.labelBold.copyWith(color: Colors.white),
+                    ),
+                  ),
+                ),
+              ],
+            );
+          },
         );
       },
     );

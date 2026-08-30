@@ -1,5 +1,6 @@
 class RiceBag {
   final String bagId;
+  final String flourType;
   final double totalKg;
   final double usedKg;
   final double remainingKg;
@@ -15,6 +16,7 @@ class RiceBag {
 
   RiceBag({
     required this.bagId,
+    this.flourType = "₹1 Rice Flour",
     required this.totalKg,
     this.usedKg = 0.0,
     required this.remainingKg,
@@ -31,6 +33,7 @@ class RiceBag {
 
   RiceBag copyWith({
     String? bagId,
+    String? flourType,
     double? totalKg,
     double? usedKg,
     double? remainingKg,
@@ -46,6 +49,7 @@ class RiceBag {
   }) {
     return RiceBag(
       bagId: bagId ?? this.bagId,
+      flourType: flourType ?? this.flourType,
       totalKg: totalKg ?? this.totalKg,
       usedKg: usedKg ?? this.usedKg,
       remainingKg: remainingKg ?? this.remainingKg,
@@ -64,6 +68,7 @@ class RiceBag {
   factory RiceBag.fromJson(Map<String, dynamic> json, {String? id}) {
     return RiceBag(
       bagId: id ?? json['bagId'] ?? '',
+      flourType: json['flourType'] ?? '₹1 Rice Flour',
       totalKg: (json['totalKg'] as num?)?.toDouble() ?? 0.0,
       usedKg: (json['usedKg'] as num?)?.toDouble() ?? 0.0,
       remainingKg: (json['remainingKg'] as num?)?.toDouble() ?? 0.0,
@@ -82,6 +87,7 @@ class RiceBag {
   Map<String, dynamic> toJson() {
     return {
       "bagId": bagId,
+      "flourType": flourType,
       "totalKg": totalKg,
       "usedKg": usedKg,
       "remainingKg": remainingKg,

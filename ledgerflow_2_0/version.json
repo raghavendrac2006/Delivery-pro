@@ -1,0 +1,6 @@
+{
+    "latest_version": "1.1.6",
+    "build_number": 18,
+    "apk_url": "https://github.com/raghavendrac2006/Ledger-Flow/releases/download/v1.1.6/app-release.apk",
+    "release_notes": "Replaced Profit Margin card with dynamic Cash Available working capital position. Added interactive detail sheet on long press detailing Cash Collected, Outstanding Payments, and active bag expenses."
+}
